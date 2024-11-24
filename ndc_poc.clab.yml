@@ -1,0 +1,172 @@
+# Copyright 2024 Daniel Melzer
+# Licensed under the BSD 3-Clause License.
+# SPDX-License-Identifier: BSD-3-Clause
+
+name: ndc_poc # Nokia DC Proof-of-Conecpt for dacoso by dm
+prefix: ""
+
+mgmt:
+  network: ndc_poc
+  ipv4-subnet: 172.80.144.0/24
+
+topology:
+  defaults:
+    kind: srl
+
+  kinds:
+    vr-sros:
+      image: registry.intra.miriquidi-net.works:9443/clab/nokia_sros:24.10.R1 
+      type: sr-1x-48d
+      license: ./license_sr.key
+    srl:
+      image: registry.intra.miriquidi-net.works:9443/clab/nokia_srl:24.7.2
+      type: ixrd2l
+
+  nodes:
+    ### DCGWS ###
+    dc-gw01-dc01:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.11
+      startup-config: startup/dc-gw01-dc01/config.partial.cfg
+    dc-gw02-dc01:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.12
+      startup-config: startup/dc-gw02-dc01/config.partial.cfg
+    dc-gw01-dc02:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.21
+      startup-config: startup/dc-gw01-dc02/config.partial.cfg
+    dc-gw02-dc02:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.22
+      startup-config: startup/dc-gw02-dc02/config.partial.cfg
+
+    ### SPINES ###
+    spine01-dc01:
+      kind: srl
+      type: ixrd4
+      mgmt-ipv4: 172.80.144.13
+      startup-config: startup/spine01-dc01/config.cfg
+    spine02-dc01:
+      kind: srl
+      type: ixrd4
+      mgmt-ipv4: 172.80.144.14
+      startup-config: startup/spine02-dc01/config.cfg
+    spine01-dc02:
+      kind: srl
+      type: ixrd4
+      mgmt-ipv4: 172.80.144.23
+      startup-config: startup/spine01-dc02/config.cfg
+    spine02-dc02:
+      kind: srl
+      type: ixrd4
+      mgmt-ipv4: 172.80.144.24
+      startup-config: startup/spine02-dc02/config.cfg
+
+    ### LEAFS ###
+    leaf01-dc01:
+      kind: srl
+      mgmt-ipv4: 172.80.144.15
+      startup-config: startup/leaf01-dc01/config.cfg
+    leaf02-dc01:
+      kind: srl
+      mgmt-ipv4: 172.80.144.16
+      startup-config: startup/leaf02-dc01/config.cfg
+    leaf03-dc01:
+      kind: srl
+      mgmt-ipv4: 172.80.144.17
+      startup-config: startup/leaf03-dc01/config.cfg
+    leaf04-dc01:
+      kind: srl
+      mgmt-ipv4: 172.80.144.18
+      startup-config: startup/leaf04-dc01/config.cfg
+    leaf01-dc02:
+      kind: srl
+      mgmt-ipv4: 172.80.144.25
+      startup-config: startup/leaf01-dc02/config.cfg
+    leaf02-dc02:
+      kind: srl
+      mgmt-ipv4: 172.80.144.26
+      startup-config: startup/leaf02-dc02/config.cfg
+    leaf03-dc02:
+      kind: srl
+      mgmt-ipv4: 172.80.144.27
+      startup-config: startup/leaf01-dc02/config.cfg
+    leaf04-dc02:
+      kind: srl
+      mgmt-ipv4: 172.80.144.28
+      startup-config: startup/leaf04-dc02/config.cfg
+
+    ### CLIENTS ###
+    cpe01-dc01:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.31
+      startup-config: startup/cpe01-dc01/config.partial.cfg
+    cpe02-dc01:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.32
+      startup-config: startup/cpe02-dc01/config.partial.cfg
+    cpe03-dc01:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.33
+      startup-config: startup/cpe03-dc01/config.partial.cfg
+    cpe04-dc01:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.34
+      startup-config: startup/cpe04-dc01/config.partial.cfg
+    cpe01-dc02:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.41
+      startup-config: startup/cpe01-dc02/config.partial.cfg
+    cpe02-dc02:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.42
+      startup-config: startup/cpe02-dc02/config.partial.cfg
+    cpe03-dc02:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.43
+      startup-config: startup/cpe03-dc02/config.partial.cfg
+    cpe04-dc02:
+      kind: vr-sros
+      mgmt-ipv4: 172.80.144.44
+      startup-config: startup/cpe04-dc02/config.partial.cfg
+
+  links:
+    - endpoints: ["dc-gw01-dc01:eth1", "dc-gw02-dc01:eth1"]
+    - endpoints: ["dc-gw01-dc01:eth2", "dc-gw01-dc02:eth2"]
+    - endpoints: ["dc-gw01-dc01:eth3", "dc-gw02-dc02:eth3"]
+    - endpoints: ["dc-gw02-dc01:eth3", "dc-gw01-dc02:eth3"]
+    - endpoints: ["dc-gw02-dc01:eth2", "dc-gw02-dc02:eth2"]
+    - endpoints: ["dc-gw01-dc02:eth1", "dc-gw02-dc02:eth1"] 
+    - endpoints: ["dc-gw01-dc01:eth5", "spine01-dc01:e1-29"]
+    - endpoints: ["dc-gw01-dc01:eth6", "spine02-dc01:e1-29"]
+    - endpoints: ["dc-gw02-dc01:eth5", "spine01-dc01:e1-30"]
+    - endpoints: ["dc-gw02-dc01:eth6", "spine02-dc01:e1-30"]
+    - endpoints: ["dc-gw01-dc02:eth5", "spine01-dc02:e1-29"]
+    - endpoints: ["dc-gw01-dc02:eth6", "spine02-dc02:e1-29"]
+    - endpoints: ["dc-gw02-dc02:eth5", "spine01-dc02:e1-30"]
+    - endpoints: ["dc-gw02-dc02:eth6", "spine02-dc02:e1-30"]
+    - endpoints: ["spine01-dc01:e1-1", "leaf01-dc01:e1-49"]
+    - endpoints: ["spine01-dc01:e1-2", "leaf02-dc01:e1-49"]
+    - endpoints: ["spine01-dc01:e1-3", "leaf03-dc01:e1-49"]
+    - endpoints: ["spine01-dc01:e1-4", "leaf04-dc01:e1-49"]
+    - endpoints: ["spine02-dc01:e1-1", "leaf01-dc01:e1-50"]
+    - endpoints: ["spine02-dc01:e1-2", "leaf02-dc01:e1-50"]
+    - endpoints: ["spine02-dc01:e1-3", "leaf03-dc01:e1-50"]
+    - endpoints: ["spine02-dc01:e1-4", "leaf04-dc01:e1-50"]
+    - endpoints: ["spine01-dc02:e1-1", "leaf01-dc02:e1-49"]
+    - endpoints: ["spine01-dc02:e1-2", "leaf02-dc02:e1-49"]
+    - endpoints: ["spine01-dc02:e1-3", "leaf03-dc02:e1-49"]
+    - endpoints: ["spine01-dc02:e1-4", "leaf04-dc02:e1-49"]
+    - endpoints: ["spine02-dc02:e1-1", "leaf01-dc02:e1-50"]
+    - endpoints: ["spine02-dc02:e1-2", "leaf02-dc02:e1-50"]
+    - endpoints: ["spine02-dc02:e1-3", "leaf03-dc02:e1-50"]
+    - endpoints: ["spine02-dc02:e1-4", "leaf04-dc02:e1-50"]
+    - endpoints: ["cpe01-dc01:eth1", "leaf01-dc01:e1-1"]
+    - endpoints: ["cpe02-dc01:eth1", "leaf02-dc01:e1-1"]
+    - endpoints: ["cpe03-dc01:eth1", "leaf03-dc01:e1-1"]
+    - endpoints: ["cpe04-dc01:eth1", "leaf04-dc01:e1-1"]
+    - endpoints: ["cpe01-dc02:eth1", "leaf01-dc02:e1-1"]
+    - endpoints: ["cpe02-dc02:eth1", "leaf02-dc02:e1-1"]
+    - endpoints: ["cpe03-dc02:eth1", "leaf03-dc02:e1-1"]
+    - endpoints: ["cpe04-dc02:eth1", "leaf04-dc02:e1-1"]
