@@ -19,7 +19,7 @@ topology:
       type: sr-1x-48d
       license: ./license_sr.key
     srl:
-      image: registry.intra.miriquidi-net.works:9443/clab/nokia_srl:24.7.2
+      image: registry.intra.miriquidi-net.works:9443/clab/nokia_srl:24.10.1
       type: ixrd2l
 
   nodes:
